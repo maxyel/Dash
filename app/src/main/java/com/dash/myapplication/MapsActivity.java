@@ -12,6 +12,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapsActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks,
@@ -19,8 +20,9 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     protected Location mLastLocation;
-    protected TextView mLatitudeText;
-    protected TextView mLongitudeText;
+    private Marker myLocationMarker;
+    //protected TextView mLatitudeText;
+    //protected TextView mLongitudeText;
     private GoogleApiClient mGoogleApiClient;
     public static final String TAG = MapsActivity.class.getSimpleName();
 
@@ -81,7 +83,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        myLocationMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -101,11 +103,13 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
         }
         else {
             handleNewLocation(mLastLocation);
-        };
-        if (mLastLocation != null) {
+        }
+
+
+        /*if (mLastLocation != null) {
             mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
             mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-        }
+        }*/
     }
 
     @Override
@@ -119,6 +123,8 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     }
 
     private void handleNewLocation(Location location) {
+        // set myLocationMarker to the new location
+        myLocationMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
         Log.d(TAG, location.toString());
     }
 }
