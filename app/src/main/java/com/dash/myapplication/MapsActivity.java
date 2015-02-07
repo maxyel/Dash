@@ -143,8 +143,8 @@ public class MapsActivity extends FragmentActivity implements
 
 
     protected void createLocationRequest() {
-        mLocationRequest.setInterval(10000);
-        mLocationRequest.setFastestInterval(1000);
+        mLocationRequest.setInterval(100);
+        mLocationRequest.setFastestInterval(100);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
     }
 
