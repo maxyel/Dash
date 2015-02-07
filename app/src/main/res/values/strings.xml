@@ -6,4 +6,6 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_maps">Map</string>
 
+    <string name="google_maps_key">AIzaSyBq0EfJQqpZOauAwdAPlWDU2uCg8wyz2pM</string>
+
 </resources>

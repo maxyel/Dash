@@ -1,6 +1,7 @@
 package com.dash.myapplication;
 
 import android.location.Location;
+import android.location.LocationListener;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -17,8 +19,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapsActivity extends FragmentActivity implements GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener {
+public class MapsActivity extends FragmentActivity implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener,
+        com.google.android.gms.location.LocationListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     protected Location mLastLocation;
@@ -27,12 +31,15 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     //protected TextView mLongitudeText;
     private GoogleApiClient mGoogleApiClient;
     public static final String TAG = MapsActivity.class.getSimpleName();
+    private LocationRequest mLocationRequest = new LocationRequest();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         setUpMapIfNeeded();
         buildGoogleApiClient();
+        // Create the LocationRequest object
+        createLocationRequest();
     }
 
     @Override
@@ -101,20 +108,16 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
 
     @Override
     public void onConnected(Bundle connectionHint) {
-        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(
-                mGoogleApiClient);
-        if (mLastLocation == null) {
-            // Blank for a moment...
-        }
-        else {
-            handleNewLocation(mLastLocation);
-        }
+        mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
 
-        /*if (mLastLocation != null) {
-            mLatitudeText.setText(String.valueOf(mLastLocation.getLatitude()));
-            mLongitudeText.setText(String.valueOf(mLastLocation.getLongitude()));
-        }*/
+        //if (mLastLocation == null) {
+            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        //}
+        //else {
+            //handleNewLocation(mLastLocation);
+        //}
+
     }
 
     @Override
@@ -137,4 +140,17 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
         //Here's how we declare a new latlng, for the sake of placing future points
         // private static final LatLng MELBOURNE = new LatLng(-37.813, 144.962);
     }
+
+
+    protected void createLocationRequest() {
+        mLocationRequest.setInterval(100);
+        mLocationRequest.setFastestInterval(100);
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        handleNewLocation(location);
+    }
+
 }
