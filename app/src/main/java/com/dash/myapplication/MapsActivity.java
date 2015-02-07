@@ -12,6 +12,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -78,13 +79,16 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     }
 
     /**
-     * This is where we can add markers or lines, add listeners or move the camera. In this case, we
-     * just add a marker near Africa.
+     * This is where we can add markers or lines, add listeners or move the camera.
      * <p/>
      * This should only be called once and when we are sure that {@link #mMap} is not null.
      */
     private void setUpMap() {
-        myLocationMarker = mMap.addMarker(new MarkerOptions().position(new LatLng(0, 0)).title("Marker"));
+        myLocationMarker = mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(0, 0))
+                .title("Marker")
+                .snippet("BITCH")
+                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -126,7 +130,11 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     private void handleNewLocation(Location location) {
         // set myLocationMarker to the new location
         myLocationMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+        mMap.animateCamera(CameraUpdateFactory
+                .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
         Log.d(TAG, location.toString());
+
+        //Here's how we declare a new latlng, for the sake of placing future points
+        // private static final LatLng MELBOURNE = new LatLng(-37.813, 144.962);
     }
 }
