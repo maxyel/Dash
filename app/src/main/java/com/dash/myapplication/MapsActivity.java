@@ -9,6 +9,7 @@ import android.widget.TextView;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
@@ -125,6 +126,7 @@ public class MapsActivity extends FragmentActivity implements GoogleApiClient.Co
     private void handleNewLocation(Location location) {
         // set myLocationMarker to the new location
         myLocationMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
         Log.d(TAG, location.toString());
     }
 }
