@@ -1,1 +1,6 @@
-# hophacksS2K15
+Dash
+====
+
+The idea
+--------
+
