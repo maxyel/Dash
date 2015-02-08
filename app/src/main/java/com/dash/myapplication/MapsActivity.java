@@ -1,14 +1,20 @@
 package com.dash.myapplication;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -16,11 +22,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -38,24 +46,34 @@ import java.util.Iterator;
 import java.util.Map;
 
 
+import static android.content.Context.LOCATION_SERVICE;
 import static java.security.AccessController.getContext;
 
 public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        com.google.android.gms.location.LocationListener {
+        com.google.android.gms.location.LocationListener,
+        OnMarkerDragListener {
+
+    public LocationManager locationManger;
+    public boolean expensive = false;
+    public boolean gameOver = false;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     protected Location mLastLocation;
     private Marker myLocationMarker;
-    //protected TextView mLatitudeText;
-    //protected TextView mLongitudeText;
+
     private GoogleApiClient mGoogleApiClient;
+
     public static final String TAG = MapsActivity.class.getSimpleName();
+    public static final float WIN_DISTANCE = 30;
+
     private LocationRequest mLocationRequest = new LocationRequest();
 
     public Map<String, Location> mLocations = new HashMap<>();
     public Map<String, Marker> mMarkers = new HashMap<>();
+
+    public String venmoAuthToken;
 
     public String androidId;
 
@@ -64,15 +82,23 @@ public class MapsActivity extends FragmentActivity implements
     // for colors
     float[] hues = {210.0f, 240.0f, 180.0f, 120.0f, 300.0f, 30.0f, 0.0f, 330.0f, 270.0f, 60.0f};
     int hueRotator = 0;
+    boolean zoomOnce = true;
+    boolean justUpdatedPin = false;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
 
+        locationManger = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+        venmoAuthToken = getIntent().getStringExtra(MainScreen.AUTH_EXTRA);
+
         setUpMapIfNeeded();
         buildGoogleApiClient();
         // Create the LocationRequest object
         createLocationRequest();
+
     }
 
     @Override
@@ -127,7 +153,7 @@ public class MapsActivity extends FragmentActivity implements
         myLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(39.327099, -76.6208752))
                 .title(androidId.toString())
-                .snippet("BITCH")
+                .snippet("ME")
                 .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
     }
 
@@ -142,17 +168,10 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        mMap.setOnMarkerDragListener(this);
 
-
-        //if (mLastLocation == null) {
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        //}
-        //else {
-            handleNewLocation(mLastLocation);
-        //}
-
-        //postData();
-
+        handleNewLocation(mLastLocation);
     }
 
     @Override
@@ -170,8 +189,11 @@ public class MapsActivity extends FragmentActivity implements
         //postData().execute();
         // set myLocationMarker to the new location
         myLocationMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
-        mMap.animateCamera(CameraUpdateFactory
-                .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+        if(zoomOnce) {
+            mMap.animateCamera(CameraUpdateFactory
+                    .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+            zoomOnce=false;
+        }
         Log.d(TAG, location.toString());
 
         // Let the server know about our updated location
@@ -198,13 +220,57 @@ public class MapsActivity extends FragmentActivity implements
 
         redrawMarkers();
 
+        if (!gameOver && mLocations.containsKey("pin")) {
+
+            String winner = checkForWinner();
+
+            if (winner != null) {
+                gameOver = true;
+                if (winner.equals(androidId)) {
+                    // I won
+                    Toast.makeText(this, "You won!", Toast.LENGTH_SHORT).show();
+
+                    if (expensive) {
+                        new SendPrizeMoneyTask(this).execute(1);
+                    }
+                } else {
+                    // I lost
+                    Toast.makeText(this, "You lost!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        }
+
         Log.d(TAG, mLocations.toString());
+    }
+
+    public String checkForWinner() {
+        String winner = null;
+        Iterator it = mLocations.entrySet().iterator();
+
+        // Goal pin's location
+        Location goal = mLocations.get("pin");
+        while(it.hasNext()) {
+            Map.Entry<String, Location> pair = (Map.Entry<String, Location>)it.next();
+            String uid = pair.getKey();
+            Location l = pair.getValue();
+
+            if (uid.equals("pin")) continue;
+
+            if (l.distanceTo(goal) <= WIN_DISTANCE) {
+                winner = uid;
+                break;
+            }
+        }
+
+        return winner;
+
     }
 
 
     // iterate through mLocations
     // if uid has a marker, update marker with location
-    // else make a new
+    // else make a new marker
     private void redrawMarkers() {
         Iterator it = mLocations.entrySet().iterator();
 
@@ -213,19 +279,74 @@ public class MapsActivity extends FragmentActivity implements
             String uid = pair.getKey();
             Location l = pair.getValue();
             Marker m;
+            // if we already know about Marker m,
             if (mMarkers.containsKey(uid)) {
+                // set markers positions from mMarkers HashMap updated by DownloadLocationsTask.java
                 m = mMarkers.get(uid);
-                m.setPosition(new LatLng(l.getLatitude(), l.getLongitude()));
+                // don't set position when "pin" and justUpdatedPin
+                if (!uid.equals("pin") || !justUpdatedPin) {
+                    m.setPosition(new LatLng(l.getLatitude(), l.getLongitude()));
+                } else {
+                    justUpdatedPin = false;
+                }
+            // add new markers (other than yourself)
             } else if (!uid.equals(androidId)) {
                 m = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(l.getLatitude(), l.getLongitude()))
                         .title(androidId.toString())
-                        .snippet("BITCH")
-                        .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));;
+                        .snippet("SOME OTHER GUY")
+                        .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
+                // set pin to draggable
+                if (uid.equals("pin")) { m.setDraggable(true); }
+                // add new marker to HashMap mMarkers
                 mMarkers.put(uid, m);
             }
-
         }
-
     }
+
+    public void pinDrop(View view) {
+        // if pin doesn't exist, make one
+        // else update location?
+
+        //int drawableResourceId = this.getResources().getIdentifier("dash.png", "drawable", this.getPackageName());
+        if (mMarkers.containsKey("pin")) {
+            // do some stuff?
+
+        } else {
+            Marker goal;
+            goal = mMap.addMarker(new MarkerOptions()
+                    .position(mMap.getCameraPosition().target)
+                    .draggable(true)
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.my_marker_icon)));
+                    //.icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
+            // wyman quad
+            mMarkers.put("pin", goal);
+            new UploadPinTask(this).execute(goal.getPosition());
+
+            //mMarkers.put
+        }
+        ((Button) view).setVisibility(View.GONE);
+    }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+       new UploadPinTask(this).execute(marker.getPosition());
+       justUpdatedPin = true;
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+    }
+
+
+    //Second Button
+    public void moreMoney(View view) {
+        expensive = true;
+        new SendPaymentTask(this).execute(1);
+    }
+
 }

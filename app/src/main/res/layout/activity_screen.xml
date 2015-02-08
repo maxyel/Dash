@@ -23,7 +23,7 @@
     <Button
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="Dash for Cash"
+        android:text="Dash For Cash"
         android:id="@+id/money"
         android:onClick="mapTime"
         style="?android:attr/borderlessButtonStyle"
