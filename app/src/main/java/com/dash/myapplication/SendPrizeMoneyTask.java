@@ -23,7 +23,7 @@ import java.io.IOException;
 public class SendPrizeMoneyTask extends AsyncTask<Integer, Integer, Boolean> {
     public static final String TAG = SendPrizeMoneyTask.class.getSimpleName();
     public static String EMAIL = "mrich520@aol.com";//"mricha56@jhu.edu";
-    public static final String ACCESS_TOKEN = "FdmDgxsMR73hRWHXatcWE2ajQX78yaSb";
+    public static final String ACCESS_TOKEN = "B3e7fbU5tEsBNYvE5zRLFEZ4Uzsw47fk";
 
     HttpClient httpclient = new DefaultHttpClient();
     Context mContext;
