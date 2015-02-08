@@ -59,7 +59,9 @@ public class MapsActivity extends FragmentActivity implements
 
     HttpClient httpclient = new DefaultHttpClient();
 
-
+    // for colors
+    float[] hues = {210.0f, 240.0f, 180.0f, 120.0f, 300.0f, 30.0f, 0.0f, 330.0f, 270.0f, 60.0f};
+    int hueRotator = 0;
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
@@ -122,9 +124,9 @@ public class MapsActivity extends FragmentActivity implements
     private void setUpMap() {
         myLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(39.327099, -76.6208752))
-                .title("Marker")
+                .title(androidId.toString())
                 .snippet("BITCH")
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
+                .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
     }
 
     protected synchronized void buildGoogleApiClient() {
@@ -215,9 +217,9 @@ public class MapsActivity extends FragmentActivity implements
             } else if (!uid.equals(androidId)) {
                 m = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(l.getLatitude(), l.getLongitude()))
-                        .title("Marker")
+                        .title(androidId.toString())
                         .snippet("BITCH")
-                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));;
+                        .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));;
                 mMarkers.put(uid, m);
             }
 
