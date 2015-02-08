@@ -1,5 +1,28 @@
-<fragment xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MapActivity" >
+
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
     android:layout_height="match_parent" android:id="@+id/map"
     tools:context="com.dash.myapplication.MapsActivity"
     android:name="com.google.android.gms.maps.SupportMapFragment" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="START"
+        android:id="@+id/fun"
+        android:layout_above="@+id/money"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:onClick="mapTime"
+        style="?android:attr/borderlessButtonStyle"
+        android:background="@drawable/button_background"
+        android:textColor="#efefef"
+        android:textSize="20dp" />
+
+</FrameLayout>
+

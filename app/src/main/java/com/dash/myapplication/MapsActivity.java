@@ -19,6 +19,10 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
 public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -112,10 +116,10 @@ public class MapsActivity extends FragmentActivity implements
 
 
         //if (mLastLocation == null) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         //}
         //else {
-            //handleNewLocation(mLastLocation);
+        //handleNewLocation(mLastLocation);
         //}
 
     }
@@ -132,7 +136,7 @@ public class MapsActivity extends FragmentActivity implements
 
     private void handleNewLocation(Location location) {
         // set myLocationMarker to the new location
-        myLocationMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
+        myLocationMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
         mMap.animateCamera(CameraUpdateFactory
                 .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
         Log.d(TAG, location.toString());
