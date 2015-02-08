@@ -4,6 +4,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.os.AsyncTask;
 import android.os.StrictMode;
+import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,6 +32,10 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+import static java.security.AccessController.getContext;
 
 public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
@@ -45,7 +50,7 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleApiClient mGoogleApiClient;
     public static final String TAG = MapsActivity.class.getSimpleName();
     private LocationRequest mLocationRequest = new LocationRequest();
-
+    public Map<String, Location> mLocations = new HashMap<>();
 
     HttpClient httpclient = new DefaultHttpClient();
 
@@ -109,7 +114,7 @@ public class MapsActivity extends FragmentActivity implements
      */
     private void setUpMap() {
         myLocationMarker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
+                .position(new LatLng(39.327099, -76.6208752))
                 .title("Marker")
                 .snippet("BITCH")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
@@ -153,13 +158,13 @@ public class MapsActivity extends FragmentActivity implements
         // send new location to server
         //postData().execute();
         // set myLocationMarker to the new location
-        myLocationMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
+        myLocationMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
         mMap.animateCamera(CameraUpdateFactory
                 .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
         Log.d(TAG, location.toString());
 
         // Let the server know about our updated location
-        new UploadLocationTask().execute(location);
+        new UploadLocationTask(this).execute(location);
 
         //location.
 
@@ -178,30 +183,8 @@ public class MapsActivity extends FragmentActivity implements
     public void onLocationChanged(Location location) {
 
         handleNewLocation(location);
+        new DownloadLocationsTask(this).execute();
 
-        //postData();
-    }
-
-    public void postData() {
-        // For debugging: allows us to execute slow networking code on the
-        // main thread.
-        /*StrictMode.ThreadPolicy policy = new
-                StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);*/
-
-        HttpPost httppost = new HttpPost("http://ec2-52-0-239-131.compute-1.amazonaws.com");
-        try {
-            // add your data
-            java.util.List<NameValuePair> nameValuePairs = new java.util.ArrayList<NameValuePair>(2);
-            nameValuePairs.add(new BasicNameValuePair("some_key1", "some value1"));
-            nameValuePairs.add(new BasicNameValuePair("some_key2", "some value2"));
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            // Execute HTTP Post Request
-            HttpResponse response = httpclient.execute(httppost);
-        } catch (ClientProtocolException e) {
-            // TODO auto-generated catch block
-        } catch (IOException e) {
-            // TODO auto-generated catch block
-        }
+        Log.d(TAG, mLocations.toString());
     }
 }
