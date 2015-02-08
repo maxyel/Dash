@@ -8,6 +8,7 @@ import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -16,11 +17,13 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.GoogleMap.OnMarkerDragListener;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -43,7 +46,8 @@ import static java.security.AccessController.getContext;
 public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
-        com.google.android.gms.location.LocationListener {
+        com.google.android.gms.location.LocationListener,
+        OnMarkerDragListener {
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     protected Location mLastLocation;
@@ -64,6 +68,9 @@ public class MapsActivity extends FragmentActivity implements
     // for colors
     float[] hues = {210.0f, 240.0f, 180.0f, 120.0f, 300.0f, 30.0f, 0.0f, 330.0f, 270.0f, 60.0f};
     int hueRotator = 0;
+    boolean zoomOnce = true;
+    boolean justUpdatedPin = false;
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
@@ -73,6 +80,7 @@ public class MapsActivity extends FragmentActivity implements
         buildGoogleApiClient();
         // Create the LocationRequest object
         createLocationRequest();
+
     }
 
     @Override
@@ -142,6 +150,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onConnected(Bundle connectionHint) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+        mMap.setOnMarkerDragListener(this);
 
 
         //if (mLastLocation == null) {
@@ -170,8 +179,11 @@ public class MapsActivity extends FragmentActivity implements
         //postData().execute();
         // set myLocationMarker to the new location
         myLocationMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
-        mMap.animateCamera(CameraUpdateFactory
-                .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+        if(zoomOnce) {
+            mMap.animateCamera(CameraUpdateFactory
+                    .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
+            zoomOnce=false;
+        }
         Log.d(TAG, location.toString());
 
         // Let the server know about our updated location
@@ -213,19 +225,67 @@ public class MapsActivity extends FragmentActivity implements
             String uid = pair.getKey();
             Location l = pair.getValue();
             Marker m;
+            // if we already know about Marker m,
             if (mMarkers.containsKey(uid)) {
+                // set markers positions from mMarkers HashMap updated by DownloadLocationsTask.java
                 m = mMarkers.get(uid);
-                m.setPosition(new LatLng(l.getLatitude(), l.getLongitude()));
+                // don't set position when "pin" and justUpdatedPin
+                if (!uid.equals("pin") || !justUpdatedPin) {
+                    m.setPosition(new LatLng(l.getLatitude(), l.getLongitude()));
+                } else {
+                    justUpdatedPin = false;
+                }
+            // add new markers (other than yourself)
             } else if (!uid.equals(androidId)) {
                 m = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(l.getLatitude(), l.getLongitude()))
                         .title(androidId.toString())
                         .snippet("BITCH")
-                        .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));;
+                        .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
+                // set pin to draggable
+                if (uid.equals("pin")) { m.setDraggable(true); }
+                // add new marker to HashMap mMarkers
                 mMarkers.put(uid, m);
             }
+        }
+    }
 
+    public void pinDrop(View view) {
+        // if pin doesn't exist, make one
+        // else update location?
+
+        //int drawableResourceId = this.getResources().getIdentifier("dash.png", "drawable", this.getPackageName());
+        if (mMarkers.containsKey("pin")) {
+            // do some stuff?
+
+        } else {
+            Marker goal;
+            goal = mMap.addMarker(new MarkerOptions()
+                    .position(mMap.getCameraPosition().target)
+                    .draggable(true)
+                            //.icon(BitmapDescriptorFactory.fromResource(drawableResourceId)));
+                    .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
+            // wyman quad
+            mMarkers.put("pin", goal);
+            new UploadPinTask(this).execute(goal.getPosition());
+
+            //mMarkers.put
         }
 
     }
+
+    @Override
+    public void onMarkerDrag(Marker marker) {
+    }
+
+    @Override
+    public void onMarkerDragEnd(Marker marker) {
+       new UploadPinTask(this).execute(marker.getPosition());
+       justUpdatedPin = true;
+    }
+
+    @Override
+    public void onMarkerDragStart(Marker marker) {
+    }
+
 }
