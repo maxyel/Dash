@@ -32,9 +32,11 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+
 
 import static java.security.AccessController.getContext;
 
@@ -141,7 +143,7 @@ public class MapsActivity extends FragmentActivity implements
 
 
         //if (mLastLocation == null) {
-            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
+        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         //}
         //else {
             handleNewLocation(mLastLocation);
