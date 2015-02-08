@@ -3,30 +3,48 @@
     android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainScreen">
-
-    <TextView android:text="Dash" android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:id="@+id/logo"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true" />
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainScreen"
+    android:background="#efefef">
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="Run for Fun"
         android:id="@+id/fun"
         android:layout_above="@+id/money"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="27dp"
-        android:onClick="mapTime" />
+        android:layout_marginBottom="20dp"
+        android:onClick="mapTime"
+        style="?android:attr/borderlessButtonStyle"
+        android:background="@drawable/button_background"
+        android:textColor="#efefef"
+        android:textSize="20dp" />
 
     <Button
-        android:layout_width="wrap_content"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="DASH FOR CASH"
         android:id="@+id/money"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
+        android:onClick="mapTime"
+        style="?android:attr/borderlessButtonStyle"
+        android:background="@drawable/button_background"
+        android:textColor="#efefef"
+        android:textSize="20dp"
+        android:layout_alignParentBottom="true"
+        android:layout_alignLeft="@+id/fun"
+        android:layout_alignStart="@+id/fun"
+        android:layout_marginBottom="214dp" />
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="150dp"
+        android:id="@+id/imageView"
+        android:src="@drawable/dash"
+        android:layout_marginBottom="35dp"
+        android:layout_above="@+id/fun"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="26dp"
+        android:layout_marginEnd="26dp" />
 
 </RelativeLayout>
