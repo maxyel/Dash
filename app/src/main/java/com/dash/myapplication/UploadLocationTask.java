@@ -53,7 +53,6 @@ public class UploadLocationTask extends AsyncTask<Location, Integer, Boolean> {
         } catch (IOException e) {
             return false;
         }
-
         return true;
     }
 

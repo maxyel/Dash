@@ -289,4 +289,9 @@ public class MapsActivity extends FragmentActivity implements
     public void onMarkerDragStart(Marker marker) {
     }
 
+    //Second Button
+    public void moreMoney() {
+
+    }
+
 }

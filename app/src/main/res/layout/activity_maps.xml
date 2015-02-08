@@ -24,5 +24,21 @@
         android:textColor="#efefef"
         android:textSize="20dp" />
 
+    <Button
+        android:layout_width="150dp"
+        android:layout_height="wrap_content"
+        android:text="UP THE ANTE"
+        android:id="@+id/more_money"
+        android:layout_above="@+id/money"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="0dp"
+        android:onClick="moreMoney"
+        style="?android:attr/borderlessButtonStyle"
+        android:background="@drawable/button_background"
+        android:textColor="#efefef"
+        android:textSize="20dp"
+        android:layout_gravity="right|bottom" />
+
+
 </FrameLayout>
 
