@@ -9,6 +9,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -271,7 +272,7 @@ public class MapsActivity extends FragmentActivity implements
 
             //mMarkers.put
         }
-
+        ((Button) view).setVisibility(View.GONE);
     }
 
     @Override
