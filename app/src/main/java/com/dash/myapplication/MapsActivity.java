@@ -2,6 +2,9 @@ package com.dash.myapplication;
 
 import android.location.Location;
 import android.location.LocationListener;
+import android.os.AsyncTask;
+import android.os.StrictMode;
+import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -19,6 +22,22 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+import static java.security.AccessController.getContext;
+
 public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
@@ -33,9 +52,19 @@ public class MapsActivity extends FragmentActivity implements
     public static final String TAG = MapsActivity.class.getSimpleName();
     private LocationRequest mLocationRequest = new LocationRequest();
 
+    public Map<String, Location> mLocations = new HashMap<>();
+    public Map<String, Marker> mMarkers = new HashMap<>();
+
+    public String androidId;
+
+    HttpClient httpclient = new DefaultHttpClient();
+
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+
         setUpMapIfNeeded();
         buildGoogleApiClient();
         // Create the LocationRequest object
@@ -92,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements
      */
     private void setUpMap() {
         myLocationMarker = mMap.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
+                .position(new LatLng(39.327099, -76.6208752))
                 .title("Marker")
                 .snippet("BITCH")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));
@@ -115,8 +144,10 @@ public class MapsActivity extends FragmentActivity implements
             LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
         //}
         //else {
-            //handleNewLocation(mLastLocation);
+            handleNewLocation(mLastLocation);
         //}
+
+        //postData();
 
     }
 
@@ -131,11 +162,18 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     private void handleNewLocation(Location location) {
+        // send new location to server
+        //postData().execute();
         // set myLocationMarker to the new location
-        myLocationMarker.setPosition(new LatLng(location.getLatitude(),location.getLongitude()));
+        myLocationMarker.setPosition(new LatLng(location.getLatitude(), location.getLongitude()));
         mMap.animateCamera(CameraUpdateFactory
                 .newLatLngZoom(new LatLng(location.getLatitude(), location.getLongitude()), 17.0f));
         Log.d(TAG, location.toString());
+
+        // Let the server know about our updated location
+        new UploadLocationTask(this).execute(location);
+
+        //location.
 
         //Here's how we declare a new latlng, for the sake of placing future points
         // private static final LatLng MELBOURNE = new LatLng(-37.813, 144.962);
@@ -150,7 +188,40 @@ public class MapsActivity extends FragmentActivity implements
 
     @Override
     public void onLocationChanged(Location location) {
+
         handleNewLocation(location);
+        new DownloadLocationsTask(this).execute();
+
+        redrawMarkers();
+
+        Log.d(TAG, mLocations.toString());
     }
 
+
+    // iterate through mLocations
+    // if uid has a marker, update marker with location
+    // else make a new
+    private void redrawMarkers() {
+        Iterator it = mLocations.entrySet().iterator();
+
+        while(it.hasNext()) {
+            Map.Entry<String, Location> pair = (Map.Entry<String, Location>)it.next();
+            String uid = pair.getKey();
+            Location l = pair.getValue();
+            Marker m;
+            if (mMarkers.containsKey(uid)) {
+                m = mMarkers.get(uid);
+                m.setPosition(new LatLng(l.getLatitude(), l.getLongitude()));
+            } else if (!uid.equals(androidId)) {
+                m = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(l.getLatitude(), l.getLongitude()))
+                        .title("Marker")
+                        .snippet("BITCH")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));;
+                mMarkers.put(uid, m);
+            }
+
+        }
+
+    }
 }
