@@ -18,7 +18,6 @@
         android:layout_above="@+id/money"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:onClick="mapTime"
         style="?android:attr/borderlessButtonStyle"
         android:background="@drawable/button_background"
         android:textColor="#efefef"

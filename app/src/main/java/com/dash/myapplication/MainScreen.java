@@ -3,12 +3,16 @@ package com.dash.myapplication;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
 
 public class MainScreen extends ActionBarActivity {
+
+    public static final String TAG = MainScreen.class.getSimpleName();
+    public static final String AUTH_EXTRA = "com.dash.myapplication.AUTH_EXTRA";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +43,21 @@ public class MainScreen extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
     public void mapTime(View view) {
+        // Receive the auth token from the intent that started MainScreen
+        final String prefix = "access_token=";
+        String fullURL= getIntent().getDataString();
+        int tokenStart = fullURL.indexOf(prefix) + prefix.length();
+        int tokenEnd = fullURL.indexOf("&", tokenStart);
+        if (tokenEnd < 0)
+            tokenEnd = fullURL.length();
+
+        String authToken = fullURL.substring(tokenStart, tokenEnd);
+        Log.d(TAG, "Auth: " + authToken);
+
         Intent intent = new Intent(this, MapsActivity.class);
+        intent.putExtra(AUTH_EXTRA, authToken);
         startActivity(intent);
     }
 }

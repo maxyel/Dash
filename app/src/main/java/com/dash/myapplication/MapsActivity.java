@@ -1,13 +1,16 @@
 package com.dash.myapplication;
 
+import android.content.Context;
 import android.location.Location;
 import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.provider.Settings;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -38,6 +41,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 
+import static android.content.Context.LOCATION_SERVICE;
 import static java.security.AccessController.getContext;
 
 public class MapsActivity extends FragmentActivity implements
@@ -45,17 +49,20 @@ public class MapsActivity extends FragmentActivity implements
         GoogleApiClient.OnConnectionFailedListener,
         com.google.android.gms.location.LocationListener {
 
+    public LocationManager locationManger = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     protected Location mLastLocation;
     private Marker myLocationMarker;
-    //protected TextView mLatitudeText;
-    //protected TextView mLongitudeText;
+
     private GoogleApiClient mGoogleApiClient;
     public static final String TAG = MapsActivity.class.getSimpleName();
     private LocationRequest mLocationRequest = new LocationRequest();
 
     public Map<String, Location> mLocations = new HashMap<>();
     public Map<String, Marker> mMarkers = new HashMap<>();
+
+    public String venmoAuthToken;
 
     public String androidId;
 
@@ -68,6 +75,8 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        venmoAuthToken = getIntent().getStringExtra(MainScreen.AUTH_EXTRA);
 
         setUpMapIfNeeded();
         buildGoogleApiClient();
@@ -143,16 +152,8 @@ public class MapsActivity extends FragmentActivity implements
     public void onConnected(Bundle connectionHint) {
         mLastLocation = LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
 
-
-        //if (mLastLocation == null) {
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, this);
-        //}
-        //else {
-            handleNewLocation(mLastLocation);
-        //}
-
-        //postData();
-
+        handleNewLocation(mLastLocation);
     }
 
     @Override
@@ -204,7 +205,7 @@ public class MapsActivity extends FragmentActivity implements
 
     // iterate through mLocations
     // if uid has a marker, update marker with location
-    // else make a new
+    // else make a new marker
     private void redrawMarkers() {
         Iterator it = mLocations.entrySet().iterator();
 
@@ -228,4 +229,8 @@ public class MapsActivity extends FragmentActivity implements
         }
 
     }
+
+    /*public void startButton(View view) {
+        new SendPaymentTask(this).execute(1);
+    }*/
 }
