@@ -136,7 +136,7 @@ public class MapsActivity extends FragmentActivity implements
         myLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(39.327099, -76.6208752))
                 .title(androidId.toString())
-                .snippet("BITCH")
+                .snippet("ME")
                 .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
     }
 
@@ -241,7 +241,7 @@ public class MapsActivity extends FragmentActivity implements
                 m = mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(l.getLatitude(), l.getLongitude()))
                         .title(androidId.toString())
-                        .snippet("BITCH")
+                        .snippet("SOME OTHER GUY")
                         .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
                 // set pin to draggable
                 if (uid.equals("pin")) { m.setDraggable(true); }
@@ -264,8 +264,8 @@ public class MapsActivity extends FragmentActivity implements
             goal = mMap.addMarker(new MarkerOptions()
                     .position(mMap.getCameraPosition().target)
                     .draggable(true)
-                            //.icon(BitmapDescriptorFactory.fromResource(drawableResourceId)));
-                    .icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.my_marker_icon)));
+                    //.icon(BitmapDescriptorFactory.defaultMarker(hues[hueRotator++ % hues.length])));
             // wyman quad
             mMarkers.put("pin", goal);
             new UploadPinTask(this).execute(goal.getPosition());
