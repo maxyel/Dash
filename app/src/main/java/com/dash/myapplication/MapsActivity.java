@@ -14,6 +14,7 @@ import android.view.View;
 
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -54,14 +55,19 @@ public class MapsActivity extends FragmentActivity implements
         com.google.android.gms.location.LocationListener,
         OnMarkerDragListener {
 
-    public LocationManager locationManger = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+    public LocationManager locationManger;
+    public boolean expensive = false;
+    public boolean gameOver = false;
 
     private GoogleMap mMap; // Might be null if Google Play services APK is not available.
     protected Location mLastLocation;
     private Marker myLocationMarker;
 
     private GoogleApiClient mGoogleApiClient;
+
     public static final String TAG = MapsActivity.class.getSimpleName();
+    public static final float WIN_DISTANCE = 30;
+
     private LocationRequest mLocationRequest = new LocationRequest();
 
     public Map<String, Location> mLocations = new HashMap<>();
@@ -83,6 +89,8 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
         androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        locationManger = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
 
         venmoAuthToken = getIntent().getStringExtra(MainScreen.AUTH_EXTRA);
 
@@ -212,7 +220,51 @@ public class MapsActivity extends FragmentActivity implements
 
         redrawMarkers();
 
+        if (!gameOver && mLocations.containsKey("pin")) {
+
+            String winner = checkForWinner();
+
+            if (winner != null) {
+                gameOver = true;
+                if (winner.equals(androidId)) {
+                    // I won
+                    Toast.makeText(this, "You won!", Toast.LENGTH_SHORT).show();
+
+                    if (expensive) {
+                        new SendPrizeMoneyTask(this).execute(1);
+                    }
+                } else {
+                    // I lost
+                    Toast.makeText(this, "You lost!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        }
+
         Log.d(TAG, mLocations.toString());
+    }
+
+    public String checkForWinner() {
+        String winner = null;
+        Iterator it = mLocations.entrySet().iterator();
+
+        // Goal pin's location
+        Location goal = mLocations.get("pin");
+        while(it.hasNext()) {
+            Map.Entry<String, Location> pair = (Map.Entry<String, Location>)it.next();
+            String uid = pair.getKey();
+            Location l = pair.getValue();
+
+            if (uid.equals("pin")) continue;
+
+            if (l.distanceTo(goal) <= WIN_DISTANCE) {
+                winner = uid;
+                break;
+            }
+        }
+
+        return winner;
+
     }
 
 
@@ -292,8 +344,9 @@ public class MapsActivity extends FragmentActivity implements
 
 
     //Second Button
-    public void moreMoney() {
-
+    public void moreMoney(View view) {
+        expensive = true;
+        new SendPaymentTask(this).execute(1);
     }
 
 }

@@ -98,7 +98,9 @@ public class DownloadLocationsTask extends AsyncTask<Integer, Integer, Map<Strin
 
     @Override
     protected void onPostExecute(Map<String, Location> stringLocationDictionary) {
-        ((MapsActivity)mContext).mLocations = stringLocationDictionary;
+        if (stringLocationDictionary != null) {
+            ((MapsActivity) mContext).mLocations = stringLocationDictionary;
+        }
         Log.d(TAG, "Finished downloading locations.\n");
     }
 }

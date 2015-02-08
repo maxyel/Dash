@@ -20,31 +20,46 @@ import java.io.IOException;
 /**
  * Created by Matt on 2/8/2015.
  */
-public class SendPaymentTask extends AsyncTask<Integer, Integer, Boolean> {
-    public static final String TAG = SendPaymentTask.class.getSimpleName();
-    public static final String EMAIL = "mrich520@aol.com";//"mricha56@jhu.edu";
+public class SendPrizeMoneyTask extends AsyncTask<Integer, Integer, Boolean> {
+    public static final String TAG = SendPrizeMoneyTask.class.getSimpleName();
+    public static String EMAIL = "mrich520@aol.com";//"mricha56@jhu.edu";
+    public static final String ACCESS_TOKEN = "FdmDgxsMR73hRWHXatcWE2ajQX78yaSb";
 
     HttpClient httpclient = new DefaultHttpClient();
     Context mContext;
 
-    public SendPaymentTask(Context context) {
+    public SendPrizeMoneyTask(Context context) {
         mContext = context;
     }
 
     @Override
     protected void onPreExecute() {
         super.onPreExecute();
+
+        String aId = ((MapsActivity) mContext).androidId;
+
+        if (aId.equals("493363329f7d669")) {
+            EMAIL = "mrich520@aol.com";
+        } else if (aId.equals("b0422120814c5ce7")) {
+            EMAIL = "ronboger99@yahoo.com";
+        } else if (aId.equals("f12e70ef3a7e170b")) {
+            EMAIL = "max.yelsky@gmail.com";
+        } else if (aId.equals("e68a9cac58d88c80")) {
+            EMAIL = "elliotbinder@gmail.com";
+        } else {
+            Log.d(TAG, "waaattt");
+        }
     }
 
     @Override
     protected void onPostExecute(Boolean aBoolean) {
         super.onPostExecute(aBoolean);
 
-        Log.d(TAG, "Payment successful...? " + aBoolean);
+        Log.d(TAG, "Prize successfuly awarded...? " + aBoolean);
 
         String resultMessage;
         if (aBoolean) {
-            resultMessage = "Added $1 to the pot";
+            resultMessage = "Claim your $1 prize in Venmo!";
         } else {
             resultMessage = "ERROR: Payment didn't go through!";
         }
@@ -55,12 +70,11 @@ public class SendPaymentTask extends AsyncTask<Integer, Integer, Boolean> {
     protected Boolean doInBackground(Integer... integers) {
 
         HttpPost httppost = new HttpPost("https://api.venmo.com/v1/payments");
-        String accessToken = ((MapsActivity)mContext).venmoAuthToken;
 
         try {
             // add your data
             java.util.List<NameValuePair> nameValuePairs = new java.util.ArrayList<NameValuePair>(3);
-            nameValuePairs.add(new BasicNameValuePair("access_token", accessToken));
+            nameValuePairs.add(new BasicNameValuePair("access_token", ACCESS_TOKEN));
             nameValuePairs.add(new BasicNameValuePair("email", EMAIL));
             nameValuePairs.add(new BasicNameValuePair("amount", integers[0].toString()));
             nameValuePairs.add(new BasicNameValuePair("note", "Da$h cash."));
