@@ -33,6 +33,7 @@ import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 import static java.security.AccessController.getContext;
@@ -50,7 +51,11 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleApiClient mGoogleApiClient;
     public static final String TAG = MapsActivity.class.getSimpleName();
     private LocationRequest mLocationRequest = new LocationRequest();
+
     public Map<String, Location> mLocations = new HashMap<>();
+    public Map<String, Marker> mMarkers = new HashMap<>();
+
+    public String androidId;
 
     HttpClient httpclient = new DefaultHttpClient();
 
@@ -58,6 +63,8 @@ public class MapsActivity extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        androidId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+
         setUpMapIfNeeded();
         buildGoogleApiClient();
         // Create the LocationRequest object
@@ -185,6 +192,36 @@ public class MapsActivity extends FragmentActivity implements
         handleNewLocation(location);
         new DownloadLocationsTask(this).execute();
 
+        redrawMarkers();
+
         Log.d(TAG, mLocations.toString());
+    }
+
+
+    // iterate through mLocations
+    // if uid has a marker, update marker with location
+    // else make a new
+    private void redrawMarkers() {
+        Iterator it = mLocations.entrySet().iterator();
+
+        while(it.hasNext()) {
+            Map.Entry<String, Location> pair = (Map.Entry<String, Location>)it.next();
+            String uid = pair.getKey();
+            Location l = pair.getValue();
+            Marker m;
+            if (mMarkers.containsKey(uid)) {
+                m = mMarkers.get(uid);
+                m.setPosition(new LatLng(l.getLatitude(), l.getLongitude()));
+            } else if (!uid.equals(androidId)) {
+                m = mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(l.getLatitude(), l.getLongitude()))
+                        .title("Marker")
+                        .snippet("BITCH")
+                        .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE)));;
+                mMarkers.put(uid, m);
+            }
+
+        }
+
     }
 }
