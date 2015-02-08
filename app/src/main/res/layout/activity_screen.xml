@@ -4,15 +4,20 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainScreen"
+<<<<<<< HEAD
     android:background="#efefef">
+=======
+    android:background="#ff14ff4f">
+>>>>>>> 5fa8e085107552b44b4136a565afa7dc3a049012
 
     <Button
         android:layout_width="200dp"
         android:layout_height="wrap_content"
         android:text="Run for Fun"
         android:id="@+id/fun"
-        android:layout_above="@+id/money"
+        android:onClick="mapTime"
         android:layout_centerHorizontal="true"
+<<<<<<< HEAD
         android:layout_marginBottom="20dp"
         android:onClick="mapTime"
         style="?android:attr/borderlessButtonStyle"
@@ -46,5 +51,25 @@
         android:layout_alignParentEnd="true"
         android:layout_marginRight="26dp"
         android:layout_marginEnd="26dp" />
+=======
+        android:layout_marginTop="159dp"
+        android:background="#ffff0099" />
+
+    <Button
+        android:layout_width="@dimen/dialog_fixed_width_major"
+        android:layout_height="wrap_content"
+        android:text="DASH FOR CASH"
+        android:id="@+id/money"
+        android:background="#ff3debff"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="98dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:textSize="@android:dimen/app_icon_size"
+        android:elegantTextHeight="false"
+        android:clickable="true" />
+>>>>>>> 5fa8e085107552b44b4136a565afa7dc3a049012
 
 </RelativeLayout>
