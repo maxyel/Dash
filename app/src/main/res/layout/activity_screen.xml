@@ -9,7 +9,7 @@
     <Button
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="Run for Fun"
+        android:text="Run For Fun"
         android:id="@+id/fun"
         android:layout_above="@+id/money"
         android:layout_centerHorizontal="true"
@@ -23,7 +23,7 @@
     <Button
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:text="DASH FOR CASH"
+        android:text="Dash for Cash"
         android:id="@+id/money"
         android:onClick="mapTime"
         style="?android:attr/borderlessButtonStyle"
